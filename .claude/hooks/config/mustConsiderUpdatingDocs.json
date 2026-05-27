@@ -1,0 +1,7 @@
+{
+  "$comment": "Watch list for the docs-review Stop check. When src/ files matching one of these patterns change without their docs/ counterparts also changing AND the doc file already exists on disk (opt-in mirror policy), the check fires. To seed an initial doc for a newly-watched source file, invoke the `generate-docs` skill manually. stopBehavior controls whether the LLM is nagged in-session (interactive) or whether a detached headless Claude is spawned to do the reconciliation in the background. Default: background.",
+  "stopBehavior": "background",
+  "patterns": [
+    "src/"
+  ]
+}

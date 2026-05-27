@@ -1,0 +1,13 @@
+# Claude Code per-session state (the hooks use this; not scaffolding)
+.claude/.state/
+
+# Personal settings override (per-developer, never committed)
+.claude/settings.local.json
+
+# Node dependencies
+node_modules/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini

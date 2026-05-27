@@ -1,0 +1,33 @@
+{
+  "$schemaVersion": 1,
+  "$comment": "Conditional tool-use rules. Each rule pairs a skill invocation pattern (skillGateRegEx) with a tool-call trigger; when the skill is invoked, captured variables open a 'gate' that authorises specific tool patterns until timeout. Rule order matters: the first rule whose trigger matches the flattened tool command is the only one consulted. Place more-specific triggers before broader ones. Variables inside conditionalAllow regex use {name} syntax and reference the named capture groups of skillGateRegEx. Captured values are regex-escaped before substitution.",
+  "rules": [
+    {
+      "name": "deploy-to-google-cloud",
+      "skillName": "deployToGoogleCloud",
+      "description": "Allow gcloud mutating commands only when /deployToGoogleCloud was invoked with a matching project and env. Read-only gcloud commands are always allowed; destructive org/IAM/project-delete commands are always denied. All other gcloud subcommands require the gate to be open and target the captured project; resource names targeting Cloud Run additionally require the env suffix.",
+      "skillGateRegEx": "^/deployToGoogleCloud\\s+(?<project>[a-z][a-z0-9-]{1,30})\\s+(?<env>dev|staging|prd)\\b",
+      "trigger": "^Bash.*\\bgcloud\\b",
+      "alwaysAllow": [
+        "\\bgcloud\\s+--version\\b",
+        "\\bgcloud\\s+help\\b",
+        "\\bgcloud\\s+auth\\s+list\\b",
+        "\\bgcloud\\s+projects\\s+list\\b",
+        "\\bgcloud\\s+config\\s+(?:list|get-value)\\b"
+      ],
+      "alwaysDeny": [
+        "\\bgcloud\\s+projects\\s+delete\\b",
+        "\\bgcloud\\s+organizations\\b",
+        "\\bgcloud\\s+iam\\s+service-accounts\\s+delete\\b",
+        "\\bgcloud\\s+resource-manager\\s+folders\\s+delete\\b"
+      ],
+      "conditionalAllow": [
+        "\\bgcloud\\s+run\\s+(?:deploy|services)\\s+\\S*-{env}\\b.*--project[= ]{project}\\b",
+        "\\bgcloud\\s+(?:sql|compute|functions|app|builds|container|secrets|storage|pubsub|logging|monitoring)\\s+\\S+.*--project[= ]{project}\\b",
+        "\\bgcloud\\s+config\\s+set\\s+project\\s+{project}\\b"
+      ],
+      "unmatchedAction": "deny",
+      "timeout": 60
+    }
+  ]
+}

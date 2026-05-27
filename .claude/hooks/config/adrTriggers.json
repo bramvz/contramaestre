@@ -1,0 +1,39 @@
+{
+  "$comment": "Config for the adr-review Stop check. stopBehavior controls whether the LLM is nagged in-session (interactive) or whether a detached headless Claude is spawned to draft the ADR in the background. Default: background.",
+  "stopBehavior": "background",
+  "adrLocations": {
+    "logFile": "docs/project_notes/decisions.md",
+    "perFileGlob": "docs/adr/[0-9]*.md"
+  },
+  "substantiality": {
+    "minFilesChanged": 5,
+    "minLinesChanged": 200,
+    "triggerPaths": [
+      "package.json",
+      "**/Cargo.toml",
+      "**/go.mod",
+      "**/requirements.txt",
+      "**/pyproject.toml",
+      "**/migrations/*",
+      "openapi.{yaml,yml,json}",
+      "**/*.proto",
+      "src/**"
+    ],
+    "excludeFromLineCount": [
+      "package-lock.json",
+      "yarn.lock",
+      "pnpm-lock.yaml",
+      "Cargo.lock",
+      "poetry.lock",
+      "Gemfile.lock",
+      "composer.lock",
+      "**/*.min.js",
+      "**/*.min.css",
+      "**/__generated__/**",
+      "**/generated/**",
+      "**/dist/**",
+      "**/build/**"
+    ],
+    "mode": "either"
+  }
+}

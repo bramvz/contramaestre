@@ -1,0 +1,42 @@
+{
+  "name": "contramaestre",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Claude Code scaffolding: hook framework, access guard, docs/ADR reconciliation, auto-format.",
+  "type": "commonjs",
+  "bin": {
+    "contramaestre": "./bin/cli.js"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node ./bin/cli.js init"
+  },
+  "files": [
+    ".claude",
+    "bin",
+    "README.md"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.0.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "semi": true,
+    "printWidth": 100,
+    "arrowParens": "always",
+    "endOfLine": "lf"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
