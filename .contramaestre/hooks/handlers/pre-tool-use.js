@@ -4,11 +4,11 @@
  * Fires before any tool call. Runs three screens in sequence:
  *
  *   1. AccessGuard — denies reads/writes/deletes against paths in
- *      .claude/hooks/config/blockedPaths.json. Sensitive-data baseline.
+ *      .contramaestre/config/blockedPaths.json. Sensitive-data baseline.
  *
  *   2. SkillGate — denies tool calls that should only run after a specific
- *      skill was invoked. Driven by .claude/hooks/config/conditionalTools.json
- *      and gate state at .claude/.state/gates-<session>.json.
+ *      skill was invoked. Driven by .contramaestre/config/conditionalTools.json
+ *      and gate state at .contramaestre/.state/gates-<session>.json.
  *
  *   3. BgBusyGuard — for Bash calls that look like `git commit`,
  *      `git push`, `git merge`, `git rebase`, `git pull`, `gh pr create`,
@@ -22,7 +22,7 @@
  * `permissionDecision: "deny"` payload to stdout and the handler returns.
  *
  * Self-protection of the hook tree itself is opt-in via the blocklist:
- * add `.claude/hooks/` and `.claude/settings.json` to blockedPaths.json
+ * add `.contramaestre/hooks/` and `.claude/settings.json` to blockedPaths.json
  * to prevent Claude from tampering with the enforcement layer.
  *
  * Escape hatches:
@@ -57,7 +57,7 @@ module.exports = async function preToolUse(payload, ctx) {
 
   // --- 1. AccessGuard --------------------------------------------------------
   const blocklistPath = path.join(
-    projectDir, '.claude', 'hooks', 'config', 'blockedPaths.json',
+    projectDir, '.contramaestre', 'config', 'blockedPaths.json',
   );
   const guard = new AccessGuard(blocklistPath, projectDir);
   const access = guard.check(
@@ -72,7 +72,7 @@ module.exports = async function preToolUse(payload, ctx) {
 
   // --- 2. SkillGate ----------------------------------------------------------
   const conditionalPath = path.join(
-    projectDir, '.claude', 'hooks', 'config', 'conditionalTools.json',
+    projectDir, '.contramaestre', 'config', 'conditionalTools.json',
   );
   let verdict;
   try {

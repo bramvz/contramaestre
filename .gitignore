@@ -1,5 +1,6 @@
 # Claude Code per-session state (the hooks use this; not scaffolding)
-.claude/.state/
+.contramaestre/.state/
+.contramaestre/hooks/logs/
 
 # Personal settings override (per-developer, never committed)
 .claude/settings.local.json

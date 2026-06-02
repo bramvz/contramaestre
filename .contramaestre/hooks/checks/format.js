@@ -63,7 +63,7 @@ module.exports = function format(payload, ctx) {
 
   const sessionId = (payload && payload.session_id) || 'no-session';
   const stateFile = path.join(
-    projectDir, '.claude', '.state', `format-ran-${sanitize(sessionId)}.json`
+    projectDir, '.contramaestre', '.state', `format-ran-${sanitize(sessionId)}.json`
   );
   const formattedHashes = readJson(stateFile, {}) || {};
 

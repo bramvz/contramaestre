@@ -10,7 +10,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js SessionStart",
+            "command": "node .contramaestre/hooks/router.js SessionStart",
             "timeout": 30
           }
         ]
@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js SessionEnd",
+            "command": "node .contramaestre/hooks/router.js SessionEnd",
             "timeout": 30
           }
         ]
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js UserPromptSubmit",
+            "command": "node .contramaestre/hooks/router.js UserPromptSubmit",
             "timeout": 30
           }
         ]
@@ -43,7 +43,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js UserPromptExpansion",
+            "command": "node .contramaestre/hooks/router.js UserPromptExpansion",
             "timeout": 30
           }
         ]
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js PreToolUse",
+            "command": "node .contramaestre/hooks/router.js PreToolUse",
             "timeout": 60
           }
         ]
@@ -65,7 +65,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js PostToolUse",
+            "command": "node .contramaestre/hooks/router.js PostToolUse",
             "timeout": 30
           }
         ]
@@ -76,7 +76,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js Notification",
+            "command": "node .contramaestre/hooks/router.js Notification",
             "timeout": 30
           }
         ]
@@ -87,7 +87,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js Stop",
+            "command": "node .contramaestre/hooks/router.js Stop",
             "timeout": 30
           }
         ]
@@ -98,7 +98,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js SubagentStop",
+            "command": "node .contramaestre/hooks/router.js SubagentStop",
             "timeout": 30
           }
         ]
@@ -109,7 +109,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/router.js PreCompact",
+            "command": "node .contramaestre/hooks/router.js PreCompact",
             "timeout": 30
           }
         ]

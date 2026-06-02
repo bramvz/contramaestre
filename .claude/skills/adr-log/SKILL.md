@@ -36,7 +36,7 @@ Use `$ARGUMENTS` as the initial decision summary when present.
 
 - ADR files: `docs/adr/<number>-<kebab-title>.md`
 - Ledger: `docs/project_notes/decisions.md`
-- If `.claude/hooks/config/adrTriggers.json` exists, read it first and use
+- If `.contramaestre/config/adrTriggers.json` exists, read it first and use
   `adrLocations.perFileGlob` and `adrLocations.logFile`.
 - New repos start at `0001`. Existing repos keep their current numeric width.
 - Next number = max number found in ADR filenames or ledger entries + 1.

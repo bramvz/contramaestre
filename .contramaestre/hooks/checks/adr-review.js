@@ -6,7 +6,7 @@
  * sensitive area touched — and no ADR was added or updated, return a
  * block prompting the LLM to invoke the `adr-log` skill.
  *
- * Config lives at .claude/hooks/config/adrTriggers.json. See the file
+ * Config lives at .contramaestre/config/adrTriggers.json. See the file
  * for the full shape; key knobs:
  *   adrLocations.logFile     - single-file ADR ledger (or null)
  *   adrLocations.perFileGlob - per-file ADR glob     (or null)
@@ -54,7 +54,7 @@ module.exports = function adrReview(payload, ctx) {
   if (!isInsideGitRepo(projectDir)) return null;
 
   const config = readJson(
-    path.join(projectDir, '.claude', 'hooks', 'config', 'adrTriggers.json'),
+    path.join(projectDir, '.contramaestre', 'config', 'adrTriggers.json'),
     null
   );
   if (!config) return null;
@@ -91,7 +91,7 @@ module.exports = function adrReview(payload, ctx) {
   // the dispatcher's stop_hook_active guard.
   const sessionId = (payload && payload.session_id) || 'no-session';
   const stateFile = path.join(
-    projectDir, '.claude', '.state', `adr-nagged-${sanitize(sessionId)}.json`
+    projectDir, '.contramaestre', '.state', `adr-nagged-${sanitize(sessionId)}.json`
   );
   const stored = readJson(stateFile, null);
   const alreadyNaggedTriggers = new Set(
@@ -240,7 +240,7 @@ function buildBackgroundPrompt(summary, repoContext, sessionId, transcriptPath) 
     `agent based on diff inspection${transcriptPath ? ' + transcript' : ''}."\n` +
     `- If the changes do NOT warrant an ADR per the skill's decision ` +
     `rules, skip writing the ADR and instead record your reasoning to ` +
-    `.claude/.state/adr-skipped-${sanitize(sessionId)}.md.\n` +
+    `.contramaestre/.state/adr-skipped-${sanitize(sessionId)}.md.\n` +
     `- Do NOT commit your changes. Leave them as uncommitted ` +
     `modifications in the working directory.`
   );

@@ -19,7 +19,7 @@ module.exports = function userPromptExpansion(payload, ctx) {
 
   const projectDir = ctx.projectDir || payload.cwd || process.cwd();
   const configPath = path.join(
-    projectDir, '.claude', 'hooks', 'config', 'conditionalTools.json',
+    projectDir, '.contramaestre', 'config', 'conditionalTools.json',
   );
 
   try {

@@ -63,7 +63,7 @@ class BgBusyGuard {
    */
   constructor(projectDir, opts) {
     this.projectDir = projectDir || process.cwd();
-    this.logPath = path.join(this.projectDir, '.claude', '.state', 'dispatch-log.jsonl');
+    this.logPath = path.join(this.projectDir, '.contramaestre', '.state', 'dispatch-log.jsonl');
     this.maxStaleMs = (opts && opts.maxStaleMs) || DEFAULT_MAX_STALE_MS;
   }
 

@@ -8,8 +8,8 @@ module.exports = [
   {
     ignores: [
       'node_modules/**',
-      '.claude/hooks/logs/**',
-      '.claude/.state/**',
+      '.contramaestre/hooks/logs/**',
+      '.contramaestre/.state/**',
       'dist/**',
       'build/**',
       'coverage/**',

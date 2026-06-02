@@ -2,7 +2,7 @@
  * Stop check: docs-review.
  *
  * When source files listed in
- *   .claude/hooks/config/mustConsiderUpdatingDocs.json
+ *   .contramaestre/config/mustConsiderUpdatingDocs.json
  * were modified this session but their corresponding doc files under
  * docs/ were not touched, either:
  *
@@ -66,7 +66,7 @@ module.exports = function docsReview(payload, ctx) {
   if (!isInsideGitRepo(projectDir)) return null;
 
   const configPath = path.join(
-    projectDir, '.claude', 'hooks', 'config', 'mustConsiderUpdatingDocs.json'
+    projectDir, '.contramaestre', 'config', 'mustConsiderUpdatingDocs.json'
   );
   const config = readConfig(configPath);
   if (config.patterns.length === 0) return null;
@@ -95,7 +95,7 @@ module.exports = function docsReview(payload, ctx) {
 
   const sessionId = (payload && payload.session_id) || 'no-session';
   const stateFile = path.join(
-    projectDir, '.claude', '.state', `docs-nagged-${sanitize(sessionId)}.json`
+    projectDir, '.contramaestre', '.state', `docs-nagged-${sanitize(sessionId)}.json`
   );
   const alreadyNagged = new Set(readJson(stateFile, []));
   const newGaps = gaps.filter((g) => !alreadyNagged.has(g.src));

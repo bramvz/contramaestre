@@ -17,6 +17,7 @@
   },
   "files": [
     ".claude",
+    ".contramaestre",
     "bin",
     "README.md"
   ],

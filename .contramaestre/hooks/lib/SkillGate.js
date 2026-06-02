@@ -3,7 +3,7 @@
 /**
  * SkillGate — conditional tool-use gating driven by skill invocations.
  *
- * Each rule in .claude/hooks/config/conditionalTools.json describes:
+ * Each rule in .contramaestre/config/conditionalTools.json describes:
  *   - a skillGateRegEx that, when matched against a user prompt, opens a
  *     "gate" with captured named-group variables;
  *   - a trigger regex that selects which tool calls the rule screens;
@@ -296,7 +296,7 @@ class SkillGate {
   _stateFile() {
     return path.join(
       this.projectDir,
-      '.claude',
+      '.contramaestre',
       '.state',
       `gates-${sanitize(this.sessionId)}.json`,
     );

@@ -14,11 +14,11 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": [".claude/hooks/**/*.js", "src/**/*"],
+  "include": [".contramaestre/hooks/**/*.js", "src/**/*"],
   "exclude": [
     "node_modules",
-    ".claude/hooks/logs",
-    ".claude/.state",
+    ".contramaestre/hooks/logs",
+    ".contramaestre/.state",
     "dist",
     "build"
   ]

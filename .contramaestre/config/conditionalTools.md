@@ -142,7 +142,7 @@ have matched `conditionalAllow`.
 Gate state is keyed per-session at:
 
 ```
-.claude/.state/gates-<sanitized-sessionId>.json
+.contramaestre/.state/gates-<sanitized-sessionId>.json
 ```
 
 Gates opened in session A are not visible to session B, even if both run

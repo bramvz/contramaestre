@@ -1,6 +1,6 @@
 ---
 name: reconcile-docs
-description: Use when a Claude Code Stop hook reports watched src/ files changed but their mirrored docs/ files were not edited. Reconcile only the supplied source/doc pairs from .claude/hooks/config/mustConsiderUpdatingDocs.json. Update docs to preserve maintainer context: why the code exists, how it connects to other modules, non-obvious constraints, contracts, and gotchas. Avoid API-reference or changelog-style restatements of code.
+description: Use when a Claude Code Stop hook reports watched src/ files changed but their mirrored docs/ files were not edited. Reconcile only the supplied source/doc pairs from .contramaestre/config/mustConsiderUpdatingDocs.json. Update docs to preserve maintainer context: why the code exists, how it connects to other modules, non-obvious constraints, contracts, and gotchas. Avoid API-reference or changelog-style restatements of code.
 argument-hint: "[source/doc pairs from hook]"
 user-invocable: false
 allowed-tools:

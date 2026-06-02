@@ -57,7 +57,7 @@ class BackgroundDispatcher {
   constructor(projectDir, sessionId) {
     this.projectDir = projectDir || process.cwd();
     this.sessionId = String(sessionId || 'no-session');
-    this.stateDir = path.join(this.projectDir, '.claude', '.state');
+    this.stateDir = path.join(this.projectDir, '.contramaestre', '.state');
     this.logPath = path.join(this.stateDir, 'dispatch-log.jsonl');
   }
 

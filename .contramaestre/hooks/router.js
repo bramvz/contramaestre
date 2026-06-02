@@ -30,6 +30,31 @@
 
 const path = require('path');
 const fs = require('fs');
+
+// ---------------------------------------------------------------------------
+// MASTER SWITCH
+// ---------------------------------------------------------------------------
+// Read from ../config/router.json (i.e. .contramaestre/config/router.json) ->
+// { "masterSwitch": true|false }. When the switch is false (or the file is
+// missing/unreadable), the router exits 0 immediately for every hook event
+// without dispatching to any handler, logging, or otherwise intervening.
+// Hardcoded default is `false` so the router stays inert unless explicitly
+// enabled.
+const ROUTER_CONFIG_PATH = path.join(__dirname, '..', 'config', 'router.json');
+const MASTER_SWITCH_DEFAULT = false;
+
+function readMasterSwitch() {
+  try {
+    const raw = fs.readFileSync(ROUTER_CONFIG_PATH, 'utf8');
+    const cfg = JSON.parse(raw);
+    return typeof cfg.masterSwitch === 'boolean' ? cfg.masterSwitch : MASTER_SWITCH_DEFAULT;
+  } catch (_e) {
+    return MASTER_SWITCH_DEFAULT;
+  }
+}
+
+const MASTER_SWITCH = readMasterSwitch();
+// ---------------------------------------------------------------------------
 const masterLogLib = require('./lib/master-log');
 
 const HOOKS_DIR = __dirname;
@@ -153,6 +178,11 @@ function describeOutcome(capturedStdout) {
 }
 
 async function main() {
+  // Master switch: when off, bypass everything and return success.
+  if (!MASTER_SWITCH) {
+    process.exit(0);
+  }
+
   const eventName = process.argv[2];
   if (!eventName) {
     process.stderr.write('[hook-router] missing event name (argv[2])\n');
