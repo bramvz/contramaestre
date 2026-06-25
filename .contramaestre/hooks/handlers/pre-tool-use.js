@@ -37,6 +37,7 @@ const path = require('path');
 const AccessGuard = require('../lib/AccessGuard');
 const SkillGate = require('../lib/SkillGate');
 const BgBusyGuard = require('../lib/BgBusyGuard');
+const PlanCapture = require('../lib/PlanCapture');
 
 const ACCESS_BLOCK_REASON = 'Stop execution, tell user you tried to access a blocked path';
 
@@ -54,6 +55,30 @@ module.exports = async function preToolUse(payload, ctx) {
   if (!payload || !payload.tool_name) return;
 
   const projectDir = ctx.projectDir || payload.cwd || process.cwd();
+
+  // --- 0. PlanCapture (ExitPlanMode) -----------------------------------------
+  // ExitPlanMode is unrelated to the file/skill/git screens below — handle it
+  // here and return. We record the proposed plan; if planCapture.autoApprove is
+  // set we also emit an `allow` decision so the plan is accepted without the
+  // dialog (logged as autoAccepted on the matching PostToolUse). Any superseded
+  // prior proposal is finalized as 'proposed' here.
+  if (PlanCapture.isExitPlanMode(payload.tool_name)) {
+    try {
+      const res = PlanCapture.onPropose(projectDir, payload);
+      if (typeof ctx.masterLog === 'function') {
+        for (const e of res.logEntries) {
+          ctx.masterLog('PlanCapture', `${e.status}: ${e.title} -> ${e.relPath}`);
+        }
+      }
+      if (res.autoApproved) {
+        emitAllow('Plan auto-approved by contramaestre (planCapture.autoApprove=true)');
+        return;
+      }
+    } catch (err) {
+      process.stderr.write(`[pre-tool-use] PlanCapture.onPropose failed: ${err && err.message}\n`);
+    }
+    return;
+  }
 
   // --- 1. AccessGuard --------------------------------------------------------
   const blocklistPath = path.join(
@@ -160,6 +185,16 @@ function emitDeny(reason) {
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',
+      permissionDecisionReason: reason,
+    },
+  }));
+}
+
+function emitAllow(reason) {
+  process.stdout.write(JSON.stringify({
+    hookSpecificOutput: {
+      hookEventName: 'PreToolUse',
+      permissionDecision: 'allow',
       permissionDecisionReason: reason,
     },
   }));

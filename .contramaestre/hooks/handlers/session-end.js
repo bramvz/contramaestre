@@ -9,11 +9,26 @@
  * Common uses:
  *   - Flush metrics, archive transcripts, send summary notification.
  *
- * Currently a no-op.
+ * Plan capture: a plan still pending at session end was proposed but never
+ * accepted — finalize it as 'proposed'. No-op when nothing is pending.
  */
 
 'use strict';
 
+const PlanCapture = require('../lib/PlanCapture');
+
 module.exports = function sessionEnd(payload, ctx) {
-  // no-op
+  if (!payload) return;
+
+  const projectDir = (ctx && ctx.projectDir) || payload.cwd || process.cwd();
+  try {
+    const res = PlanCapture.flushPending(projectDir, payload.session_id || 'no-session');
+    if (res && res.logEntries && ctx && typeof ctx.masterLog === 'function') {
+      for (const e of res.logEntries) {
+        ctx.masterLog('PlanCapture', `${e.status}: ${e.title} -> ${e.relPath}`);
+      }
+    }
+  } catch (err) {
+    process.stderr.write(`[session-end] PlanCapture.flushPending failed: ${err && err.message}\n`);
+  }
 };

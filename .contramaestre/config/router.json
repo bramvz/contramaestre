@@ -1,3 +1,4 @@
 {
-  "masterSwitch": false
+  "masterSwitch": true,
+  "checkinEnabled": false
 }

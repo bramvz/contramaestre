@@ -1,0 +1,7 @@
+{
+  "$schemaVersion": 1,
+  "$comment": "Plan capture for ExitPlanMode. When enabled, each plan's terminal state is recorded in the master log via the 'PlanCapture' component. States: 'accepted' = user approved via the plan dialog; 'autoAccepted' = approved with no human in the loop; 'proposed' = shown but never accepted (rejected/superseded, or session ended first). Accepted/autoAccepted plans are kept as exactly ONE file per proposal in .contramaestre/plans/ — the body is the APPROVED text (the user may edit it at the dialog), and an 'edited' metadata flag records whether they changed it (true) or accepted it unchanged (false). 'proposed' plans are logged only: their draft file is NOT retained (deleted on supersession or at SessionEnd). autoApprove=true makes contramaestre itself auto-approve plans (PreToolUse emits an 'allow' decision, skipping the dialog) and is logged deterministically as autoAccepted. When autoApprove=false, an EXTERNAL auto-approver (settings permissions.allow, a separate PermissionRequest/PreToolUse hook, etc.) is detected heuristically: if PostToolUse follows PreToolUse within autoAcceptGapMs, it is logged autoAccepted instead of accepted. Set enabled=false to disable plan capture entirely without touching the router master switch.",
+  "enabled": true,
+  "autoApprove": false,
+  "autoAcceptGapMs": 1000
+}
