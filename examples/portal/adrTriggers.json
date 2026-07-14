@@ -1,0 +1,38 @@
+{
+  "$comment": "adr-review config for the portal monorepo. Copy to portal/.contramaestre/config/adrTriggers.json after install. Only difference from the shipped default is triggerPaths: the single src/** entry is replaced with frontend/src/** + backend/src/**, and the workspace package.json manifests are listed explicitly (portal is JS/TS only, so the Rust/Go/Python manifest triggers are dropped). adrLocations keeps the defaults — portal has no docs/adr/ or docs/project_notes/ yet, so the first ADR creates them; repoint them (e.g. to docs/decisions.md) if you prefer another location.",
+  "stopBehavior": "background",
+  "adrLocations": {
+    "logFile": "docs/project_notes/decisions.md",
+    "perFileGlob": "docs/adr/[0-9]*.md"
+  },
+  "substantiality": {
+    "minFilesChanged": 5,
+    "minLinesChanged": 200,
+    "triggerPaths": [
+      "package.json",
+      "frontend/package.json",
+      "backend/package.json",
+      "**/migrations/*",
+      "openapi.{yaml,yml,json}",
+      "**/*.proto",
+      "frontend/src/**",
+      "backend/src/**"
+    ],
+    "excludeFromLineCount": [
+      "package-lock.json",
+      "yarn.lock",
+      "pnpm-lock.yaml",
+      "Cargo.lock",
+      "poetry.lock",
+      "Gemfile.lock",
+      "composer.lock",
+      "**/*.min.js",
+      "**/*.min.css",
+      "**/__generated__/**",
+      "**/generated/**",
+      "**/dist/**",
+      "**/build/**"
+    ],
+    "mode": "either"
+  }
+}

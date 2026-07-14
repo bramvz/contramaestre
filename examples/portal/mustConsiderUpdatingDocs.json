@@ -1,0 +1,8 @@
+{
+  "$comment": "docs-review config for the portal monorepo. Copy to portal/.contramaestre/config/mustConsiderUpdatingDocs.json after installing contramaestre there (see this directory's README). frontend/src mirrors into docs/frontend and backend/src into docs/backend, dropping the src/ segment, e.g. frontend/src/components/Foo.vue -> docs/frontend/components/Foo.md and backend/src/routes/user.js -> docs/backend/routes/user.md. The check fires only when a watched source file changes without its mirror doc AND that doc already exists (opt-in), so existing topic docs under docs/ are untouched until you seed per-file mirrors with the generate-docs skill.",
+  "stopBehavior": "background",
+  "mappings": [
+    { "sourceRoot": "frontend/src/", "docRoot": "docs/frontend/" },
+    { "sourceRoot": "backend/src/", "docRoot": "docs/backend/" }
+  ]
+}
