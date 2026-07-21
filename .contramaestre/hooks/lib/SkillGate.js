@@ -71,15 +71,24 @@ class SkillGate {
     const now = new Date().toISOString();
     let mutated = false;
 
+    // Expansion-before-Submit ordering: when a skill is genuinely invoked,
+    // the CLI fires UserPromptExpansion BEFORE UserPromptSubmit. If an
+    // expansion was seen within the grace window, the proof-of-invocation
+    // has already arrived — open the gate directly instead of pending.
+    const lastExpansionMs = Date.parse(state.__lastExpansionAt || '');
+    const expansionJustFired =
+      !Number.isNaN(lastExpansionMs) &&
+      Date.now() - lastExpansionMs <= PROMOTION_WINDOW_MS;
+
     for (const rule of this.rules) {
       const m = rule.skillGateRegex.exec(promptText);
       if (!m) continue;
       const vars = m.groups ? { ...m.groups } : {};
       state[rule.name] = {
-        status: 'pending',
+        status: expansionJustFired ? 'open' : 'pending',
         vars,
         openedAt: now,
-        promotedAt: null,
+        promotedAt: expansionJustFired ? now : null,
         sessionId: this.sessionId,
       };
       mutated = true;
@@ -100,7 +109,10 @@ class SkillGate {
 
     const state = this._readState();
     const now = Date.now();
-    let mutated = false;
+    // Stamp the expansion time so recordPromptSubmit (which fires ~ms later
+    // for a real skill invocation) can open its gate directly.
+    state.__lastExpansionAt = new Date(now).toISOString();
+    let mutated = true;
 
     for (const rule of this.rules) {
       const entry = state[rule.name];
