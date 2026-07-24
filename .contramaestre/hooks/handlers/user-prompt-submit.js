@@ -31,13 +31,16 @@ module.exports = function userPromptSubmit(payload, ctx) {
     process.stderr.write(`[user-prompt-submit] SkillGate failed: ${err && err.message}\n`);
   }
 
-  // Check-in gate. Skip when the prompt is itself a /checkin invocation (the
-  // skill manages the state file, and the user must be able to clear the block).
-  // Otherwise: BLOCK the prompt if there is no check-in or it's stale (>2h), or
-  // silently refresh the timestamp if it's recent. A returned reason becomes a
-  // UserPromptSubmit { decision: "block", reason } so the prompt is refused.
+  // Check-in gate. Skip when the prompt is itself a check-in invocation in any
+  // of the skill's documented forms — "/checkin …", "checkin", "check in" /
+  // "check-in", or a leading "continue" (the skill's refresh trigger) — since
+  // the skill manages the state file and the user must always be able to clear
+  // the block. Otherwise: refuse the prompt if there is no check-in or it's
+  // stale (>2h), or silently refresh the timestamp if it's recent. A returned
+  // reason is injected as additionalContext directing Claude to refuse the
+  // request this turn (see below — a hard block would yield no visible reply).
   try {
-    const isCheckinPrompt = /^\s*\/?checkin\b/i.test(payload.prompt);
+    const isCheckinPrompt = /^\s*(\/?check[-\s]?in\b|continue\b)/i.test(payload.prompt);
     if (!isCheckinPrompt) {
       const { reason, refreshed } = CheckinReminder.evaluate(
         projectDir, payload.session_id || 'no-session',

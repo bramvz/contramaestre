@@ -75,10 +75,18 @@ class SkillGate {
     // the CLI fires UserPromptExpansion BEFORE UserPromptSubmit. If an
     // expansion was seen within the grace window, the proof-of-invocation
     // has already arrived — open the gate directly instead of pending.
+    // The stamp is consumed here regardless of whether any rule matches:
+    // each Submit pairs with at most the one Expansion that immediately
+    // preceded it, so a single expansion must never vouch for gates across
+    // multiple subsequent submits.
     const lastExpansionMs = Date.parse(state.__lastExpansionAt || '');
     const expansionJustFired =
       !Number.isNaN(lastExpansionMs) &&
       Date.now() - lastExpansionMs <= PROMOTION_WINDOW_MS;
+    if (state.__lastExpansionAt !== undefined) {
+      delete state.__lastExpansionAt;
+      mutated = true;
+    }
 
     for (const rule of this.rules) {
       const m = rule.skillGateRegex.exec(promptText);

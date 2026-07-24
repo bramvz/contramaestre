@@ -30,7 +30,9 @@
  * block (decision:block / exit 2) stops Claude from running at all, so the user
  * sees no agent reply. Enforcement is therefore agent-level (Claude obeying the
  * injected directive), not a kernel block. The handler skips this check when
- * the prompt is itself a `/checkin`, so the user can always clear the gate.
+ * the prompt is itself a check-in invocation in any documented form ("/checkin",
+ * "checkin", "check in"/"check-in", or a leading "continue"), so the user can
+ * always clear the gate.
  *
  * Best-effort: never throws outward (handler also wraps in try/catch). The only
  * write is the in-place timestamp refresh, done atomically (tmp+rename).
@@ -111,6 +113,27 @@ function describeTask(state) {
 }
 
 /**
+ * Side-effect-free predicate: has this session passed the check-in gate?
+ * True when the feature is disabled (the gate is not in force) or a readable,
+ * fresh (<= STALE_MS) check-in record exists for the session. Never writes —
+ * unlike evaluate(), the timestamp is NOT refreshed. Used by other hooks
+ * (e.g. the Stop dispatcher) to skip work in sessions that are still gated.
+ */
+function hasPassed(projectDir, sessionId) {
+  if (!isCheckinEnabled(projectDir)) return true;
+  try {
+    const state = JSON.parse(
+      fs.readFileSync(stateFile(projectDir, sessionId), 'utf8'),
+    );
+    const parsedMs = Date.parse(state && state.timestamp);
+    if (Number.isNaN(parsedMs)) return false;
+    return Date.now() - parsedMs <= STALE_MS;
+  } catch (_e) {
+    return false; // no file / unreadable → never checked in
+  }
+}
+
+/**
  * Evaluate the session's check-in. Returns { reason } — a string to BLOCK the
  * prompt with, or { reason: null } when the check-in is fresh (just refreshed).
  */
@@ -160,6 +183,7 @@ function evaluate(projectDir, sessionId) {
 module.exports = {
   STALE_MS,
   evaluate,
+  hasPassed,
   stateFile,
   isCheckinEnabled,
   _internals: { describeTask, nowIso, sanitize, NO_CHECKIN_REASON },

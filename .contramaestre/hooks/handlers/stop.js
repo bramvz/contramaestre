@@ -28,12 +28,19 @@
  * Reentrancy: when `payload.stop_hook_active === true`, Claude Code is
  * telling us a previous Stop hook already requested continued work in
  * this chain. The dispatcher bails immediately so we don't ping-pong.
+ *
+ * Check-in gate: when `checkinEnabled` is on (router.json) and this session
+ * has no fresh check-in, ALL checks are skipped — the session is still gated
+ * at the prompt level, so no real work has happened, and dispatching
+ * adr/docs/format reviews (which spawn background claude agents) would be
+ * wasted. No-op when the check-in feature is disabled.
  */
 
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
+const CheckinReminder = require('../lib/CheckinReminder');
 
 const CHECKS_DIR = path.join(__dirname, '..', 'checks');
 const BANNER = '═'.repeat(67);
@@ -41,6 +48,22 @@ const BANNER = '═'.repeat(67);
 module.exports = async function stop(payload, ctx) {
   if (payload && payload.stop_hook_active === true) return;
   if (!fs.existsSync(CHECKS_DIR)) return;
+
+  // Skip every check while the session is still behind the check-in gate.
+  // hasPassed() is side-effect-free and returns true when the feature is
+  // disabled. Best-effort: on an unexpected error, run the checks as before.
+  try {
+    const projectDir = (ctx && ctx.projectDir) || (payload && payload.cwd) || process.cwd();
+    const sessionId = (payload && payload.session_id) || 'no-session';
+    if (!CheckinReminder.hasPassed(projectDir, sessionId)) {
+      if (ctx && typeof ctx.masterLog === 'function') {
+        ctx.masterLog('Stop:dispatcher', 'skipped all checks: no active check-in');
+      }
+      return;
+    }
+  } catch (err) {
+    process.stderr.write(`[stop-dispatcher] check-in gate errored (running checks anyway): ${err && err.message}\n`);
+  }
 
   const files = fs.readdirSync(CHECKS_DIR)
     .filter((f) => f.endsWith('.js'))

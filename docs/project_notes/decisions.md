@@ -20,3 +20,5 @@ Guardrails). The Stop hook that prompts for ADR consideration is
 ## Decisions
 
 <!-- New entries go below this line, in ascending ADR number order. -->
+
+- **ADR-0001** (2026-07-24, Proposed) — Enforce prompt gates at agent level with single-use proof — guardrail: one UserPromptExpansion vouches for at most the one immediately-following Submit; consume `__lastExpansionAt` on every Submit — [details](../adr/0001-agent-level-prompt-gates.md)

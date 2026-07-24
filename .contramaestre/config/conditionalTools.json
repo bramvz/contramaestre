@@ -6,7 +6,7 @@
       "name": "deploy-to-google-cloud",
       "skillName": "deployToGoogleCloud",
       "description": "Allow gcloud mutating commands only when /deployToGoogleCloud was invoked with a matching project and env. Read-only gcloud commands are always allowed; destructive org/IAM/project-delete commands are always denied. All other gcloud subcommands require the gate to be open and target the captured project; resource names targeting Cloud Run additionally require the env suffix.",
-      "skillGateRegEx": "^/deployToGoogleCloud\\s+(?<project>[a-z][a-z0-9-]{1,30})\\s+(?<env>dev|staging|prd)\\b",
+      "skillGateRegEx": "^/deployToGoogleCloud\\s+(?<project>[a-z][a-z0-9-]{1,30})\\s+(?<env>dev|uat|prd)\\b",
       "trigger": "^Bash.*\\bgcloud\\b",
       "alwaysAllow": [
         "\\bgcloud\\s+--version\\b",

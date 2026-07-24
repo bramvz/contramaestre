@@ -26,7 +26,7 @@ calls based on whether the user invoked a specific skill earlier in the session.
   "name": "deploy-to-google-cloud",
   "skillName": "deployToGoogleCloud",
   "description": "…",
-  "skillGateRegEx": "^/deployToGoogleCloud\\s+(?<project>[a-z][a-z0-9-]{1,30})\\s+(?<env>dev|staging|prd)\\b",
+  "skillGateRegEx": "^/deployToGoogleCloud\\s+(?<project>[a-z][a-z0-9-]{1,30})\\s+(?<env>dev|uat|prd)\\b",
   "trigger": "^Bash.*\\bgcloud\\b",
   "alwaysAllow": [ /* regex */ ],
   "alwaysDeny":  [ /* regex */ ],

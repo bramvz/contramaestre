@@ -23,7 +23,7 @@
  *         preserve (copy only if not present — consumer customizes):
  *           config/*.json
  *         skip entirely (per-consumer runtime state):
- *           .state/, hooks/logs/*.log
+ *           .state/, plans/, hooks/logs/*.log
  *
  * Self-install guard: when this script is invoked during `npm install`
  * inside the contramaestre repo itself (developing the scaffold), the CLI
@@ -94,6 +94,7 @@ const issues = [];
 function classifyContra(relPath) {
   // Per-consumer runtime state — never copy.
   if (relPath === '.state' || relPath.startsWith('.state/')) return 'skip';
+  if (relPath === 'plans' || relPath.startsWith('plans/')) return 'skip';
   if (
     (relPath === 'hooks/logs' || relPath.startsWith('hooks/logs/')) &&
     path.basename(relPath) !== '.gitignore'
