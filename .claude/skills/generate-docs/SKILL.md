@@ -1,8 +1,9 @@
 ---
 name: generate-docs
 description: >
-  Create an initial documentation file for a single source file at the
-  canonical mirror path (src/X.ext → docs/X.md). Use when the user
+  Create an initial documentation file for a single source file at its
+  configured mirror path (by default src/X.ext → docs/X.md, or per the
+  `mappings` in mustConsiderUpdatingDocs.json). Use when the user
   asks to "generate docs for <file>", "create initial docs for <file>",
   "document this module", or adds a new module that warrants durable
   prose. Companion to `reconcile-docs`: this skill seeds the doc,
@@ -62,12 +63,22 @@ the module accrues gotchas.
 
 1. **Resolve the source path** from `$ARGUMENTS`. Normalize to
    project-relative. Verify the file exists. If the path is outside
-   the typical mirrored area (e.g., not under `src/`), confirm with
-   the user before proceeding.
+   the mirrored area (not under any configured `sourceRoot`, or not
+   under `src/` when no mappings are configured), confirm with the
+   user before proceeding.
 
-2. **Compute the mirror doc path.** Convention:
-   - `src/foo/bar.ts` → `docs/foo/bar.md`
-   - `src/foo/bar.py` → `docs/foo/bar.md`
+2. **Compute the mirror doc path.** If
+   `.contramaestre/config/mustConsiderUpdatingDocs.json` defines a
+   `mappings` list, use the first mapping whose `sourceRoot` prefixes
+   the source path: strip that `sourceRoot`, prepend the mapping's
+   `docRoot`, and swap the extension for `.md`. Otherwise fall back to
+   the single-root default `src/ → docs/`.
+   - With `mappings` (e.g. a `frontend/` + `backend/` monorepo):
+     - `frontend/src/components/Foo.vue` → `docs/frontend/components/Foo.md`
+     - `backend/src/routes/user.js` → `docs/backend/routes/user.md`
+   - Single-root default (no `mappings`):
+     - `src/foo/bar.ts` → `docs/foo/bar.md`
+     - `src/foo/bar.py` → `docs/foo/bar.md`
    - Any source extension → `.md`
 
 3. **Refuse to overwrite.** If the doc file already exists, stop and

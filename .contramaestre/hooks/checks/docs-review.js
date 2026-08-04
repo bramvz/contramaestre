@@ -29,7 +29,13 @@
  *     in this session (per-session dedup state).
  *
  * Source-to-doc convention:
- *   src/foo/bar.ts -> docs/foo/bar.md
+ *   Default (no `mappings` configured): src/foo/bar.ts -> docs/foo/bar.md
+ *   With `mappings` (opt-in, set in mustConsiderUpdatingDocs.json): each
+ *   {sourceRoot, docRoot} pair maps sourceRoot-relative files into docRoot,
+ *   e.g. {frontend/src/, docs/frontend/} sends
+ *   frontend/src/components/Foo.vue -> docs/frontend/components/Foo.md. This
+ *   lets one repo watch several source roots (e.g. a frontend/ + backend/
+ *   monorepo) while single-root repos keep the default behavior untouched.
  */
 
 'use strict';
@@ -69,7 +75,7 @@ module.exports = function docsReview(payload, ctx) {
     projectDir, '.contramaestre', 'config', 'mustConsiderUpdatingDocs.json'
   );
   const config = readConfig(configPath);
-  if (config.patterns.length === 0) return null;
+  if (!config.mappings && config.patterns.length === 0) return null;
 
   const changed = getModifiedFiles(projectDir);
   if (changed.length === 0) return null;
@@ -79,8 +85,17 @@ module.exports = function docsReview(payload, ctx) {
 
   const gaps = [];
   for (const file of normChanged) {
-    if (!fileMatchesAny(file, config.patterns)) continue;
-    const docPath = sourceToDocPath(file);
+    // Multi-root repos configure explicit {sourceRoot, docRoot} mappings,
+    // which fully determine both watched-ness and the doc path. Single-root
+    // repos leave `mappings` unset and fall back to the default coarse
+    // pattern filter + hardcoded src/ -> docs/ translation.
+    let docPath;
+    if (config.mappings) {
+      docPath = docPathFromMappings(file, config.mappings);
+    } else {
+      if (!fileMatchesAny(file, config.patterns)) continue;
+      docPath = sourceToDocPath(file);
+    }
     if (!docPath) continue;
     if (changedSet.has(docPath)) continue;
     // Opt-in policy: only enforce existing doc mirrors. If the doc file
@@ -219,33 +234,54 @@ function buildBackgroundPrompt(gaps, repoContext, sessionId, transcriptPath) {
 // ---------------------------------------------------------------------------
 
 function readConfig(file) {
-  const fallback = { patterns: [], stopBehavior: 'background' };
+  const fallback = { patterns: [], mappings: null, stopBehavior: 'background' };
   let raw;
   try {
     raw = JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch (_e) {
     return fallback;
   }
-  // Accept three shapes:
-  //   [string, …]                     legacy bare array
-  //   { patterns: [string, …] }       early object form
-  //   { stopBehavior, patterns: […] } current
-  let patterns;
-  let stopBehavior = 'background';
+  // Accept these shapes:
+  //   [string, …]                                              bare array (patterns; default mode)
+  //   { patterns: [string, …] }                                object form (patterns; default mode)
+  //   { stopBehavior, patterns: […] }                          single-root (default)
+  //   { stopBehavior, mappings: [{sourceRoot, docRoot}, …] }   multi-root (opt-in)
+  // `patterns` and `mappings` may both appear; the check prefers `mappings`
+  // when present. `mappings` is null unless at least one valid pair parses,
+  // so a malformed or empty list degrades to the default pattern path.
   if (Array.isArray(raw)) {
-    patterns = raw;
-  } else if (raw && Array.isArray(raw.patterns)) {
-    patterns = raw.patterns;
-    if (raw.stopBehavior === 'interactive' || raw.stopBehavior === 'background') {
-      stopBehavior = raw.stopBehavior;
-    }
-  } else {
-    return fallback;
+    return {
+      patterns: raw.filter((p) => typeof p === 'string' && p.trim()),
+      mappings: null,
+      stopBehavior: 'background',
+    };
   }
-  return {
-    patterns: patterns.filter((p) => typeof p === 'string' && p.trim()),
-    stopBehavior,
-  };
+  if (!raw || typeof raw !== 'object') return fallback;
+
+  let stopBehavior = 'background';
+  if (raw.stopBehavior === 'interactive' || raw.stopBehavior === 'background') {
+    stopBehavior = raw.stopBehavior;
+  }
+  const patterns = Array.isArray(raw.patterns)
+    ? raw.patterns.filter((p) => typeof p === 'string' && p.trim())
+    : [];
+  return { patterns, mappings: normalizeMappings(raw.mappings), stopBehavior };
+}
+
+// Validate and normalize the opt-in `mappings` list. Returns an array of
+// {sourceRoot, docRoot} with both fields non-empty strings, or null when
+// nothing usable is configured (which routes the check to the default path).
+function normalizeMappings(raw) {
+  if (!Array.isArray(raw)) return null;
+  const out = [];
+  for (const m of raw) {
+    if (!m || typeof m !== 'object') continue;
+    const sourceRoot = typeof m.sourceRoot === 'string' ? m.sourceRoot.trim() : '';
+    const docRoot = typeof m.docRoot === 'string' ? m.docRoot.trim() : '';
+    if (!sourceRoot || !docRoot) continue;
+    out.push({ sourceRoot, docRoot });
+  }
+  return out.length > 0 ? out : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -316,6 +352,26 @@ function sourceToDocPath(file) {
   return 'docs/' + tail + '.md';
 }
 
+// Config-driven variant of sourceToDocPath. Given the parsed `mappings`
+// list, return the mirror doc path for the first mapping whose sourceRoot
+// prefixes `file`, or null when no mapping matches or the file is not a
+// recognized code file. Mappings are matched in order and the first match
+// wins — list more specific roots first if any nest. Trailing slashes on
+// both roots are normalized, so "frontend/src" and "frontend/src/" behave
+// identically.
+function docPathFromMappings(file, mappings) {
+  for (const m of mappings) {
+    const sourceRoot = m.sourceRoot.replace(/[/\\]+$/, '') + '/';
+    if (!file.startsWith(sourceRoot)) continue;
+    const ext = path.posix.extname(file);
+    if (!CODE_EXTS.has(ext.toLowerCase())) return null;
+    const tail = file.slice(sourceRoot.length, -ext.length);
+    const docRoot = m.docRoot.replace(/[/\\]+$/, '');
+    return (docRoot ? docRoot + '/' : '') + tail + '.md';
+  }
+  return null;
+}
+
 function readJson(file, fallback) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
   catch (_e) { return fallback; }
@@ -329,3 +385,8 @@ function writeJson(file, data) {
 function sanitize(s) {
   return String(s).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 64);
 }
+
+// Exposed for unit tests only; the router invokes the default export above.
+module.exports.docPathFromMappings = docPathFromMappings;
+module.exports.sourceToDocPath = sourceToDocPath;
+module.exports.readConfig = readConfig;

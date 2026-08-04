@@ -8,6 +8,7 @@
     "contramaestre": "./bin/cli.js"
   },
   "scripts": {
+    "test": "node scripts/run-tests.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
